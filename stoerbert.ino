@@ -227,9 +227,14 @@ void loadAlbum() {
             continue;
         }
 
-        // TODO: file extension validatiion
-
         DPRINTLN(entry.name());
+
+        if (!musicPlayer.isMP3File(entry.name())) {
+            DPRINTLNF("Not a MP3 skipping");
+            continue;
+        }
+
+        // TODO: sorting
 
         album[i] = malloc(strlen(entry.name()) + 1);
         strcpy(album[i], entry.name());
