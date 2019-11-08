@@ -31,7 +31,7 @@ const uint8_t MAX_TRACKS = 30;
 
 uint8_t volume = 50;
 char *album[MAX_TRACKS];
-char currentAlbum = '1';
+char currentAlbum[] = "k01";
 uint8_t currentAlbumTrackCount = 0;
 uint8_t currentTrack = 0;
 
@@ -64,40 +64,45 @@ void loop() {
 
         switch (c) {
             // Start playing
-            case'1':
-            case'2':
-            case'3':
-            case'4':
-            case'5':
-            case'6':
-            case'7':
-            case'8':
-            case'9':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
                 DPRINTF("Received Command: PLAY ");
                 DPRINTLN(c);
-                currentAlbum = c;
+                currentAlbum[2] = c;
                 playAlbum();
                 break;
+            // GOD mode !!!
+            case 'g':
+                DPRINTLNF("Received Command: God Mode");
+                currentAlbum[0] = 'g';
+                break;
             // Toggle play/pause
-            case'p':
+            case 'p':
                 DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
                 playTogglePause();
                 break;
-            case'f':
+            case 'f':
                 DPRINTLNF("Received Command: NEXT TRACK");
                 playNextTrack();
                 break;
-            case'b':
+            case 'b':
                 DPRINTLNF("Received Command: PREVIOUS TRACK");
                 playPreviousTrack();
                 break;
             // Increase volume
-            case'+':
+            case '+':
                 DPRINTLNF("Received Command: VOLUME +");
                 increaseVolume();
                 break;
             // Decrease volume
-            case'-':
+            case '-':
                 DPRINTLNF("Received Command: VOLUME -");
                 decreaseVolume();
                 break;
@@ -183,19 +188,14 @@ void playAlbum() {
 }
 
 void playFile() {
-    char path[10];
-    char folder[] = {'/', currentAlbum, '\0'};
-
-    folder[1] = currentAlbum;
-    sprintf(path, "%s/%s", folder, album[currentTrack]);
+    char path[99];
+    sprintf(path, "/%s/%s", currentAlbum, album[currentTrack]);
 
     DPRINTF("Playing file ");
     DPRINTLN(path);
 
     musicPlayer.startPlayingFile(path);
 }
-
-
 
 // ##################################
 // File handling
@@ -205,7 +205,8 @@ void playFile() {
 // Directory and file structure needs to be:
 // /[1-9]/[01-99].mp3
 void loadAlbum() {
-    char folder[] = {'/', currentAlbum, '/', '\0'};
+    char folder[6];
+    sprintf(folder, "/%s/", currentAlbum);
 
     DPRINTF("Loading files from directory: ");
     DPRINTLN(folder);
