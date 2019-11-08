@@ -8,9 +8,7 @@
 #define CARDCS 4 // Card chip select pin
 #define DREQ 3 // VS1053 Data request, ideally an Interrupt pin
 
-
 #define DEBUG
-
 #ifdef DEBUG
 #define DPRINTLN(x) Serial.println(x)
 #define DPRINTLNF(x) Serial.println(F(x))
@@ -29,10 +27,14 @@ Adafruit_VS1053_FilePlayer musicPlayer =
 
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
-const uint8_t MAX_TRACKS = 255;
+const uint8_t MAX_TRACKS = 30;
 
 uint8_t volume = 50;
 char *album[MAX_TRACKS];
+char currentAlbum = '1';
+uint8_t currentAlbumTrackCount = 0;
+uint8_t currentTrack = 0;
+
 
 void setup() {
     #ifdef DEBUG
@@ -73,7 +75,8 @@ void loop() {
             case'9':
                 DPRINTF("Received Command: PLAY ");
                 DPRINTLN(c);
-                playAlbum(c);
+                currentAlbum = c;
+                playAlbum();
                 break;
             // Toggle play/pause
             case'p':
@@ -150,24 +153,45 @@ void playTogglePause() {
 
 // Skip forward
 void playNextTrack() {
+    if (currentTrack == currentAlbumTrackCount) {
+        return;
+    }
+
+    currentTrack++;
+    musicPlayer.stopPlaying();
+    playFile();
 }
 
 // Skip backward
 void playPreviousTrack() {
+    if (currentTrack == 0) {
+        return;
+    }
+
+    currentTrack--;
+    musicPlayer.stopPlaying();
+    playFile();
 }
 
-void playAlbum(char c) {
-    char folder[4] = {'/', c, '/', '\0'};
-    loadAlbum(folder);
+void playAlbum() {
+    DPRINTF("Playing album ");
+    DPRINTLN(currentAlbum);
 
-    char b[10];
-    sprintf(b, "%s/%s", folder, album[0]);
-    playFile(b);
+    loadAlbum();
+
+    playFile();
 }
 
-void playFile(char path[]) {
+void playFile() {
+    char path[10];
+    char folder[] = {'/', currentAlbum, '\0'};
+
+    folder[1] = currentAlbum;
+    sprintf(path, "%s/%s", folder, album[currentTrack]);
+
     DPRINTF("Playing file ");
     DPRINTLN(path);
+
     musicPlayer.startPlayingFile(path);
 }
 
@@ -180,14 +204,16 @@ void playFile(char path[]) {
 // Load album files
 // Directory and file structure needs to be:
 // /[1-9]/[01-99].mp3
-void loadAlbum(char folder[]) {
+void loadAlbum() {
+    char folder[] = {'/', currentAlbum, '/', '\0'};
+
     DPRINTF("Loading files from directory: ");
     DPRINTLN(folder);
 
     File dir = SD.open(folder);
 
     // Process diretories in /
-    int i = 0;
+    uint8_t i = 0;
     while (true) {
         File entry = dir.openNextFile();
 
@@ -203,10 +229,14 @@ void loadAlbum(char folder[]) {
         // TODO: file extension validatiion
 
         DPRINTLN(entry.name());
+
         album[i] = malloc(strlen(entry.name()) + 1);
         strcpy(album[i], entry.name());
         i++;
 
         entry.close();
     }
+
+
+    currentAlbumTrackCount = i -1;
 }
