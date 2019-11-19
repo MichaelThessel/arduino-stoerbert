@@ -4,7 +4,8 @@ TODO:
 * File sorting/file name based playback
 * Auto next track
 * Mono Mode
-* God mode button sequence
+* God mode enable chime
+* God mode album select
 * Button handling:
  * Play/Pause
  * Forward
@@ -39,7 +40,6 @@ Reseach if headphone jack is possible
 #define DPRINTF(x)
 #endif
 
-
 Adafruit_VS1053_FilePlayer musicPlayer =
  Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
 
@@ -47,12 +47,12 @@ const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
 const uint8_t MAX_TRACKS = 30;
 
-uint8_t volume = 50;
-char *album[MAX_TRACKS];
-char currentAlbum[] = "k01";
-uint8_t currentAlbumTrackCount = 0;
-uint8_t currentTrack = 0;
-
+uint8_t volume = 50; // Volume level
+char *album[MAX_TRACKS]; // Album track buffer
+char currentAlbum[] = "k01"; // Currently selected album
+uint8_t currentAlbumTrackCount = 0; // Track count for currently selected album
+uint8_t currentTrack = 0; // Current track
+uint8_t gmflag = 0; // God mode flag
 
 void setup() {
     #ifdef DEBUG
@@ -94,12 +94,13 @@ void loop() {
                 DPRINTF("Received Command: PLAY ");
                 DPRINTLN(c);
                 currentAlbum[2] = c;
+                detectGodMode(c);
                 playAlbum();
                 break;
             // GOD mode !!!
             case 'g':
                 DPRINTLNF("Received Command: God Mode");
-                currentAlbum[0] = 'g';
+                setGodMode();
                 break;
             // Toggle play/pause
             case 'p':
@@ -221,6 +222,28 @@ void playFile() {
     musicPlayer.startPlayingFile(path);
 }
 
+// Detects the god mode sequence
+// Sequence: 1 - 2 - 4 - 8
+void detectGodMode(char c) {
+    if (gmflag == 0 && c == '1') {
+        gmflag++;
+    } else if (gmflag == 1 && c == '2') {
+        gmflag++;
+    } else if (gmflag == 2 && c == '4') {
+        gmflag++;
+    } else if (gmflag == 3 && c == '8') {
+        setGodMode();
+    } else {
+        gmflag = 0;
+    }
+}
+
+// Selects god mode albums
+void setGodMode() {
+    DPRINTLNF("Godmode enabled");
+    currentAlbum[0] = 'g';
+}
+
 // ##################################
 // File handling
 // ##################################
@@ -268,5 +291,5 @@ void loadAlbum() {
     }
 
 
-    currentAlbumTrackCount = i -1;
+    currentAlbumTrackCount = i - 1;
 }
