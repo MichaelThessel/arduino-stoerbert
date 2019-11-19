@@ -1,3 +1,21 @@
+/**
+TODO:
+
+* File sorting/file name based playback
+* Auto next track
+* Mono Mode
+* God mode button sequence
+* Button handling:
+ * Play/Pause
+ * Forward
+ * Backward
+ * Album select regular
+ * Album select god mode
+* Volume pot handling
+
+Reseach if headphone jack is possible
+
+*/
 #include <SPI.h>
 #include <Adafruit_VS1053.h>
 #include <SD.h>
