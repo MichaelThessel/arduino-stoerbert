@@ -124,6 +124,12 @@ void loop() {
                 DPRINTLNF("Received Command: VOLUME -");
                 decreaseVolume();
                 break;
+            case '\n':
+                break;
+            default:
+                DPRINTF("Invalid command: ");
+                DPRINTLN(c);
+                break;
         }
     }
     #endif
