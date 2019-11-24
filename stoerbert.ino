@@ -13,6 +13,7 @@ TODO:
  * Album select regular
  * Album select god mode
 * Volume pot handling
+* Sleep mode
 
 Reseach if headphone jack is possible
 
