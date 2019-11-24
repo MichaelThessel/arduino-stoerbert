@@ -2,7 +2,6 @@
 TODO:
 
 * File sorting/file name based playback
-* Auto next track
 * Mono Mode
 * God mode album select
 * Button handling:
@@ -54,7 +53,8 @@ char currentAlbum[] = "k01"; // Currently selected album
 uint8_t currentAlbumTrackCount = 0; // Track count for currently selected album
 uint8_t currentTrack = 0; // Current track
 bool isPlaying = false; // Whether or not there is currently an album playing
-uint8_t gmflag = 0; // God mode flag
+uint8_t gmflag = 0; // God detction mode flag
+bool isGodMode = false; // Whether or not god mode is enabled
 
 void setup() {
     #ifdef DEBUG
@@ -223,7 +223,7 @@ bool detectGodMode(char c) {
         gmflag++;
         return false;
     } else if (gmflag == 3 && c == '8') {
-        setGodMode();
+        toggleGodMode();
         return true;
     }
 
@@ -231,10 +231,8 @@ bool detectGodMode(char c) {
     return false;
 }
 
-// Selects god mode albums
-void setGodMode() {
-    DPRINTLNF("Godmode enabled");
-
+// Toggles god mode
+void toggleGodMode() {
     resetPlayback();
 
     musicPlayer.stopPlaying();
@@ -242,7 +240,15 @@ void setGodMode() {
     delay(1000);
     musicPlayer.stopPlaying();
 
-    currentAlbum[0] = 'g';
+    isGodMode = !isGodMode;
+
+    if (isGodMode) {
+        DPRINTLNF("Godmode enabled");
+        currentAlbum[0] = 'g';
+    } else {
+        DPRINTLNF("Godmode disabled");
+        currentAlbum[0] = 'k';
+    }
 }
 
 // ##################################
@@ -323,7 +329,7 @@ void handleSerial() {
             // GOD mode !!!
             case 'g':
                 DPRINTLNF("Received Command: God Mode");
-                setGodMode();
+                toggleGodMode();
                 break;
 
             // Toggle play/pause
