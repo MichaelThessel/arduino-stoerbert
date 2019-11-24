@@ -311,5 +311,5 @@ void loadAlbum() {
         entry.close();
     }
 
-    currentAlbumTrackCount = i - 1;
+    currentAlbumTrackCount = i;
 }
