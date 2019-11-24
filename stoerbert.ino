@@ -98,36 +98,48 @@ void loop() {
                 detectGodMode(c);
                 playAlbum();
                 break;
+
             // GOD mode !!!
             case 'g':
                 DPRINTLNF("Received Command: God Mode");
                 setGodMode();
                 break;
+
             // Toggle play/pause
             case 'p':
                 DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
                 playTogglePause();
                 break;
+
+            // Next track
             case 'f':
                 DPRINTLNF("Received Command: NEXT TRACK");
                 playNextTrack();
                 break;
+
+            // Previous track
             case 'b':
                 DPRINTLNF("Received Command: PREVIOUS TRACK");
                 playPreviousTrack();
                 break;
+
             // Increase volume
             case '+':
                 DPRINTLNF("Received Command: VOLUME +");
                 increaseVolume();
                 break;
+
             // Decrease volume
             case '-':
                 DPRINTLNF("Received Command: VOLUME -");
                 decreaseVolume();
                 break;
+
+            // Ignore newlines
             case '\n':
                 break;
+
+            // Log invalid commands
             default:
                 DPRINTF("Invalid command: ");
                 DPRINTLN(c);
@@ -163,6 +175,7 @@ void decreaseVolume() {
     setVolume(volume);
 }
 
+// Set volume
 void setVolume(uint8_t volume) {
     DPRINTF("Setting volume to: ");
     DPRINTLN(volume);
@@ -204,15 +217,22 @@ void playPreviousTrack() {
     playFile();
 }
 
+// Play album
 void playAlbum() {
+    loadAlbum();
+
+    if (currentAlbumTrackCount == 0) {
+        DPRINTLNF("No tracks found");
+        return;
+    }
+
     DPRINTF("Playing album ");
     DPRINTLN(currentAlbum);
-
-    loadAlbum();
 
     playFile();
 }
 
+// Play individual file
 void playFile() {
     char path[99];
     sprintf(path, "/%s/%s", currentAlbum, album[currentTrack]);
@@ -290,7 +310,6 @@ void loadAlbum() {
 
         entry.close();
     }
-
 
     currentAlbumTrackCount = i - 1;
 }
