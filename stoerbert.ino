@@ -4,7 +4,6 @@ TODO:
 * File sorting/file name based playback
 * Auto next track
 * Mono Mode
-* God mode enable chime
 * God mode album select
 * Button handling:
  * Play/Pause
@@ -64,6 +63,7 @@ void setup() {
         DPRINTLNF("Couldn't find VS1053");
         while (1);
     }
+
     DPRINTLNF("VS1053 found");
 
      if (!SD.begin(CARDCS)) {
@@ -262,6 +262,12 @@ void detectGodMode(char c) {
 // Selects god mode albums
 void setGodMode() {
     DPRINTLNF("Godmode enabled");
+
+    musicPlayer.stopPlaying();
+    musicPlayer.sineTest(150, 1000);
+    delay(1000);
+    musicPlayer.stopPlaying();
+
     currentAlbum[0] = 'g';
 }
 
