@@ -10,7 +10,6 @@ TODO:
  * Backward
  * Album select regular
  * Album select god mode
-* Volume pot handling
 * Sleep mode
 * Save current track on EEPROM
 
@@ -43,6 +42,8 @@ Reseach if headphone jack is possible
 Adafruit_VS1053_FilePlayer musicPlayer =
  Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
 
+const uint8_t PIN_VOLUME = A0;
+
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
 const uint8_t MAX_TRACKS = 30;
@@ -57,10 +58,20 @@ uint8_t gmflag = 0; // God detction mode flag
 bool isGodMode = false; // Whether or not god mode is enabled
 
 void setup() {
+    setupSerial();
+    setupVS1053();
+    setupButtons();
+}
+
+// Set up serial connection
+void setupSerial() {
     #ifdef DEBUG
     Serial.begin(9600);
     #endif
+}
 
+// Set up player
+void setupVS1053() {
     if (!musicPlayer.begin()) {
         DPRINTLNF("Couldn't find VS1053");
         while (1);
@@ -72,10 +83,15 @@ void setup() {
         while (1);
     }
 
-    // Init player
-    musicPlayer.setVolume(volume, volume);
     musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);
 }
+
+void setupButtons() {
+    // Set up volume knob
+    pinMode(PIN_VOLUME, INPUT);
+    setVolume(volume);
+}
+
 
 void loop() {
     #ifdef DEBUG
@@ -83,6 +99,16 @@ void loop() {
     #endif
 
     advanceTrack();
+
+    handleButtons();
+}
+
+// ##################################
+// Buttons
+// ##################################
+void handleButtons() {
+    // Handle volume pot
+    setVolume(map(analogRead(PIN_VOLUME), 100, 900, 0, 100));
 }
 
 // ##################################
@@ -111,8 +137,12 @@ void decreaseVolume() {
 
 // Set volume
 void setVolume(uint8_t volume) {
-    DPRINTF("Setting volume to: ");
-    DPRINTLN(volume);
+    if (volume > VOLUME_MIN) {
+        volume = VOLUME_MIN;
+    }
+
+    //DPRINTF("Setting volume to: ");
+    //DPRINTLN(volume);
     musicPlayer.setVolume(volume, volume);
 }
 
