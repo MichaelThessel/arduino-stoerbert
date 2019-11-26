@@ -20,29 +20,40 @@ Reseach if headphone jack is possible
 #include <Adafruit_VS1053.h>
 #include <SD.h>
 
-#define SHIELD_RESET -1 // VS1053 reset pin (unused!)
-#define SHIELD_CS 7 // VS1053 chip select pin (output)
-#define SHIELD_DCS 6 // VS1053 Data/command select pin (output)
-#define CARDCS 4 // Card chip select pin
-#define DREQ 3 // VS1053 Data request, ideally an Interrupt pin
+#define PIN_VS1053_SHIELD_RESET -1 // VS1053 reset pin (unused!)
+#define PIN_VS1053_SHIELD_CS 7 // VS1053 chip select pin (output)
+#define PIN_VS1053_SHIELD_DCS 6 // VS1053 Data/command select pin (output)
+#define PIN_VS1053_CARDCS 4 // Card chip select pin
+#define PIN_VS1053_DREQ 3 // VS1053 Data request, ideally an Interrupt pin
+#define PIN_VOLUME A0 // Volume knob pin
+#define PIN_SR_DATA 2 // Shift register data pin
+#define PIN_SR_CLOCK 5 // Shift register data pin
+#define PIN_SR_LATCH 8 // Shift register latch pin
 
 #define DEBUG
 #ifdef DEBUG
 #define DPRINTLN(x) Serial.println(x)
+#define DPRINTBINLN(x) Serial.println(x, BIN)
 #define DPRINTLNF(x) Serial.println(F(x))
 #define DPRINT(x) Serial.print(x)
+#define DPRINTBIN(x) Serial.print(x, BIN)
 #define DPRINTF(x) Serial.print(F(x))
 #else
 #define DPRINTLN(x)
+#define DPRINTBINLN(x)
 #define DPRINTLNF(x)
 #define DPRINT(x)
+#define DPRINTBIN(x)
 #define DPRINTF(x)
 #endif
 
-Adafruit_VS1053_FilePlayer musicPlayer =
- Adafruit_VS1053_FilePlayer(SHIELD_RESET, SHIELD_CS, SHIELD_DCS, DREQ, CARDCS);
-
-const uint8_t PIN_VOLUME = A0;
+Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
+    PIN_VS1053_SHIELD_RESET,
+    PIN_VS1053_SHIELD_CS,
+    PIN_VS1053_SHIELD_DCS,
+    PIN_VS1053_DREQ,
+    PIN_VS1053_CARDCS
+);
 
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
@@ -56,6 +67,9 @@ uint8_t currentTrack = 0; // Current track
 bool isPlaying = false; // Whether or not there is currently an album playing
 uint8_t gmflag = 0; // God detction mode flag
 bool isGodMode = false; // Whether or not god mode is enabled
+
+uint8_t sr1State = 0;
+uint8_t sr2State = 0;
 
 void setup() {
     setupSerial();
@@ -78,7 +92,7 @@ void setupVS1053() {
     }
     DPRINTLNF("VS1053 found");
 
-    if (!SD.begin(CARDCS)) {
+    if (!SD.begin(PIN_VS1053_CARDCS)) {
         DPRINTLNF("SD failed, or not present");
         while (1);
     }
@@ -90,6 +104,11 @@ void setupButtons() {
     // Set up volume knob
     pinMode(PIN_VOLUME, INPUT);
     setVolume(volume);
+
+    // Set up shift registers for buttons
+    pinMode(PIN_SR_LATCH, OUTPUT);
+    pinMode(PIN_SR_CLOCK, OUTPUT);
+    pinMode(PIN_SR_DATA, INPUT);
 }
 
 
@@ -106,9 +125,19 @@ void loop() {
 // ##################################
 // Buttons
 // ##################################
+
 void handleButtons() {
     // Handle volume pot
     setVolume(map(analogRead(PIN_VOLUME), 100, 900, 0, 100));
+
+    // Handle button shift registers
+    digitalWrite(PIN_SR_LATCH, 1);
+    delayMicroseconds(20);
+    digitalWrite(PIN_SR_LATCH, 0);
+    sr1State = shiftIn();
+    sr2State = shiftIn();
+    //DPRINTBINLN(sr1State);
+    //DPRINTBINLN(sr2State);
 }
 
 // ##################################
@@ -403,4 +432,26 @@ void handleSerial() {
                 break;
         }
     }
+}
+
+// ##################################
+// Helper functions
+// ##################################
+
+// Returns current shift register state as byte
+// Bit 7 = Pin 7 / Bit 0= Pin 0
+byte shiftIn() {
+    byte data = 0;
+
+    for (int i = 7; i >= 0; i--) {
+        digitalWrite(PIN_SR_CLOCK, 0);
+        delayMicroseconds(2);
+        if (digitalRead(PIN_SR_DATA)) {
+            data = data | (1 << i);
+        }
+        digitalWrite(PIN_SR_CLOCK, 1);
+
+    }
+
+    return data;
 }
