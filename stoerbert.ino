@@ -76,6 +76,10 @@ uint8_t sr2StatePrevious = -1; // Shift register 2 previouse state
 unsigned long sr1LastDebounceTime = 0; // Shift register 1 time since last debounce
 unsigned long sr2LastDebounceTime = 0; // Shift register 2 time since last debounce
 
+// ##################################
+// Setup
+// ##################################
+
 void setup() {
     setupSerial();
     setupVS1053();
@@ -116,6 +120,9 @@ void setupButtons() {
     pinMode(PIN_SR_DATA, INPUT);
 }
 
+// ##################################
+// Main loop
+// ##################################
 
 void loop() {
     #ifdef DEBUG
@@ -127,10 +134,7 @@ void loop() {
     handleButtons();
 }
 
-// ##################################
-// Buttons
-// ##################################
-
+// Button handling
 void handleButtons() {
     // Handle volume pot
     setVolume(map(analogRead(PIN_VOLUME), 100, 900, 0, 100));
