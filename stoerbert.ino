@@ -76,6 +76,25 @@ uint8_t sr2StatePrevious = -1; // Shift register 2 previouse state
 unsigned long sr1LastDebounceTime = 0; // Shift register 1 time since last debounce
 unsigned long sr2LastDebounceTime = 0; // Shift register 2 time since last debounce
 
+struct srAssignments {
+    // Shift register 1
+    const uint8_t button1           = 0b10000000;
+    const uint8_t button2           = 0b01000000;
+    const uint8_t button3           = 0b00100000;
+    const uint8_t button4           = 0b00010000;
+    const uint8_t button5           = 0b00001000;
+    const uint8_t button6           = 0b00000100;
+    const uint8_t button7           = 0b00000010;
+    const uint8_t button8           = 0b00000001;
+
+    // Shift register 2
+    const uint8_t button9           = 0b10000000;
+    const uint8_t buttonPlayPause   = 0b01000000;
+    const uint8_t buttonPrevious    = 0b00100000;
+    const uint8_t buttonNext        = 0b00010000;
+};
+srAssignments sra;
+
 // ##################################
 // Setup
 // ##################################
@@ -149,13 +168,15 @@ void handleButtons() {
     //DPRINTBINLN(sr2State);
 
     if (debounce(&sr1State, &sr1StatePrevious, &sr1LastDebounceTime)) {
-        if (sr1State & 0b00001000) {
-            togglePlayPause();
-        }
-
-        if (sr1State & 0b10000000) {
+        if (sr1State & sra.button1) {
             currentAlbum[2] = '1';
             playAlbum();
+        }
+    }
+
+    if (debounce(&sr2State, &sr2StatePrevious, &sr2LastDebounceTime)) {
+        if (sr2State & sra.buttonPlayPause) {
+            togglePlayPause();
         }
     }
 }
