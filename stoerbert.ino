@@ -137,7 +137,7 @@ void loop() {
 // Button handling
 void handleButtons() {
     // Handle volume pot
-    setVolume(map(analogRead(PIN_VOLUME), 100, 900, 0, 100));
+    setVolume(map(analogRead(PIN_VOLUME), 0, 1023, 0, VOLUME_MIN));
 
     // Handle button shift registers
     digitalWrite(PIN_SR_LATCH, 1);
