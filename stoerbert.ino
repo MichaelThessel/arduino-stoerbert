@@ -69,12 +69,12 @@ bool isPlaying = false; // Whether or not there is currently an album playing
 uint8_t gmflag = 0; // God detction mode flag
 bool isGodMode = false; // Whether or not god mode is enabled
 
-uint8_t sr1State = 0;
-uint8_t sr2State = 0;
-uint8_t sr1StatePrevious = -1;
-uint8_t sr2StatePrevious = -1;
-unsigned long sr1LastDebounceTime = 0;
-unsigned long sr2LastDebounceTime = 0;
+uint8_t sr1State = 0; // Shift register 1 current state
+uint8_t sr2State = 0; // Shift register 2 current state
+uint8_t sr1StatePrevious = -1; // Shift register 1 previous state
+uint8_t sr2StatePrevious = -1; // Shift register 2 previouse state
+unsigned long sr1LastDebounceTime = 0; // Shift register 1 time since last debounce
+unsigned long sr2LastDebounceTime = 0; // Shift register 2 time since last debounce
 
 void setup() {
     setupSerial();
