@@ -58,7 +58,7 @@ Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
 const uint8_t MAX_TRACKS = 30;
-const uint8_t DEBOUNCE_DELAY = 200;
+const uint8_t DEBOUNCE_DELAY = 500;
 
 uint8_t volume = 50; // Volume level
 char *album[MAX_TRACKS]; // Album track buffer
@@ -69,12 +69,11 @@ bool isPlaying = false; // Whether or not there is currently an album playing
 uint8_t gmflag = 0; // God detction mode flag
 bool isGodMode = false; // Whether or not god mode is enabled
 
-uint8_t sr1State = 0; // Shift register 1 current state
-uint8_t sr2State = 0; // Shift register 2 current state
-uint8_t sr1StatePrevious = -1; // Shift register 1 previous state
-uint8_t sr2StatePrevious = -1; // Shift register 2 previouse state
-unsigned long sr1LastDebounceTime = 0; // Shift register 1 time since last debounce
-unsigned long sr2LastDebounceTime = 0; // Shift register 2 time since last debounce
+struct sr {
+    uint8_t state; // Shift register current state
+    uint8_t previous; // Shift register previous state
+    unsigned long debounceTime; // Shift register time since last debounce
+} sr1, sr2 = {0, -1, 0};
 
 struct srAssignments {
     // Shift register 1
@@ -162,20 +161,20 @@ void handleButtons() {
     digitalWrite(PIN_SR_LATCH, 1);
     delayMicroseconds(20);
     digitalWrite(PIN_SR_LATCH, 0);
-    sr1State = shiftIn();
-    sr2State = shiftIn();
-    //DPRINTBINLN(sr1State);
-    //DPRINTBINLN(sr2State);
+    sr1.state = shiftIn();
+    sr2.state = shiftIn();
+    //DPRINTBINLN(sr1.state);
+    //DPRINTBINLN(sr2.state);
 
-    if (debounce(&sr1State, &sr1StatePrevious, &sr1LastDebounceTime)) {
-        if (sr1State & sra.button1) {
+    if (debounce(&sr1.state, &sr1.previous, &sr1.debounceTime)) {
+        if (sr1.state & sra.button1) {
             currentAlbum[2] = '1';
             playAlbum();
         }
     }
 
-    if (debounce(&sr2State, &sr2StatePrevious, &sr2LastDebounceTime)) {
-        if (sr2State & sra.buttonPlayPause) {
+    if (debounce(&sr2.state, &sr2.previous, &sr2.debounceTime)) {
+        if (sr2.state & sra.buttonPlayPause) {
             togglePlayPause();
         }
     }
