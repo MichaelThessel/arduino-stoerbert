@@ -61,20 +61,26 @@ const uint8_t MAX_TRACKS = 30;
 const uint8_t DEBOUNCE_DELAY = 500;
 
 uint8_t volume = 50; // Volume level
-char *album[MAX_TRACKS]; // Album track buffer
-char currentAlbum[] = "k01"; // Currently selected album
-uint8_t currentAlbumTrackCount = 0; // Track count for currently selected album
-uint8_t currentTrack = 0; // Current track
-bool isPlaying = false; // Whether or not there is currently an album playing
-uint8_t gmflag = 0; // God detction mode flag
-bool isGodMode = false; // Whether or not god mode is enabled
 
+// Player holds current player state
+struct player {
+    char *album[MAX_TRACKS]; // Album track buffer
+    char currentAlbum[4]; // Currently selected album
+    uint8_t currentAlbumTrackCount; // Track count for currently selected album
+    uint8_t currentTrack; // Current track
+    bool isPlaying; // Whether or not there is currently an album playing
+    uint8_t godModeFlag; // God detction mode flag
+    bool isGodMode; // Whether or not god mode is enabled
+} p = {{}, "k01", 0, 0, false, 0, false};
+
+// Shift register states
 struct sr {
     uint8_t state; // Shift register current state
     uint8_t previous; // Shift register previous state
     unsigned long debounceTime; // Shift register time since last debounce
 } sr1, sr2 = {0, -1, 0};
 
+// Shift register button - pin mappings
 struct srAssignments {
     // Shift register 1
     const uint8_t button1           = 0b10000000;
@@ -168,7 +174,7 @@ void handleButtons() {
 
     if (debounce(&sr1.state, &sr1.previous, &sr1.debounceTime)) {
         if (sr1.state & sra.button1) {
-            currentAlbum[2] = '1';
+            p.currentAlbum[2] = '1';
             playAlbum();
         }
     }
@@ -230,22 +236,22 @@ void togglePlayPause() {
 
 // Skip forward
 void playNextTrack() {
-    if (currentTrack == currentAlbumTrackCount - 1) {
+    if (p.currentTrack == p.currentAlbumTrackCount - 1) {
         return;
     }
 
-    currentTrack++;
+    p.currentTrack++;
     musicPlayer.stopPlaying();
     playFile();
 }
 
 // Skip backward
 void playPreviousTrack() {
-    if (currentTrack == 0) {
+    if (p.currentTrack == 0) {
         return;
     }
 
-    currentTrack--;
+    p.currentTrack--;
     musicPlayer.stopPlaying();
     playFile();
 }
@@ -254,16 +260,16 @@ void playPreviousTrack() {
 void playAlbum() {
     loadAlbum();
 
-    if (currentAlbumTrackCount == 0) {
+    if (p.currentAlbumTrackCount == 0) {
         DPRINTLNF("No tracks found");
         return;
     }
 
     resetPlayback();
-    isPlaying = true;
+    p.isPlaying = true;
 
     DPRINTF("Playing album ");
-    DPRINTLN(currentAlbum);
+    DPRINTLN(p.currentAlbum);
 
     playFile();
 }
@@ -271,7 +277,7 @@ void playAlbum() {
 // Play individual file
 void playFile() {
     char path[99];
-    sprintf(path, "/%s/%s", currentAlbum, album[currentTrack]);
+    sprintf(path, "/%s/%s", p.currentAlbum, p.album[p.currentTrack]);
 
     DPRINTF("Playing file ");
     DPRINTLN(path);
@@ -283,7 +289,7 @@ void playFile() {
 void advanceTrack()
 {
     // Don't do anything if we are not playing
-    if (!isPlaying) {
+    if (!p.isPlaying) {
         return;
     }
 
@@ -293,7 +299,7 @@ void advanceTrack()
     }
 
     // Exit if we reached the last track
-    if (currentTrack == currentAlbumTrackCount - 1) {
+    if (p.currentTrack == p.currentAlbumTrackCount - 1) {
         resetPlayback();
         DPRINTLNF("End of album reached");
         return;
@@ -304,29 +310,29 @@ void advanceTrack()
 
 // Reset album playback
 void resetPlayback() {
-    isPlaying = false;
+    p.isPlaying = false;
     musicPlayer.stopPlaying();
-    currentTrack = 0;
+    p.currentTrack = 0;
 }
 
 // Detects the god mode sequence
 // Sequence: 1 - 2 - 4 - 8
 bool detectGodMode(char c) {
-    if (gmflag == 0 && c == '1') {
-        gmflag++;
+    if (p.godModeFlag == 0 && c == '1') {
+        p.godModeFlag++;
         return false;
-    } else if (gmflag == 1 && c == '2') {
-        gmflag++;
+    } else if (p.godModeFlag == 1 && c == '2') {
+        p.godModeFlag++;
         return false;
-    } else if (gmflag == 2 && c == '4') {
-        gmflag++;
+    } else if (p.godModeFlag == 2 && c == '4') {
+        p.godModeFlag++;
         return false;
-    } else if (gmflag == 3 && c == '8') {
+    } else if (p.godModeFlag == 3 && c == '8') {
         toggleGodMode();
         return true;
     }
 
-    gmflag = 0;
+    p.godModeFlag = 0;
     return false;
 }
 
@@ -339,14 +345,14 @@ void toggleGodMode() {
     delay(1000);
     musicPlayer.stopPlaying();
 
-    isGodMode = !isGodMode;
+    p.isGodMode = !p.isGodMode;
 
-    if (isGodMode) {
+    if (p.isGodMode) {
         DPRINTLNF("Godmode enabled");
-        currentAlbum[0] = 'g';
+        p.currentAlbum[0] = 'g';
     } else {
         DPRINTLNF("Godmode disabled");
-        currentAlbum[0] = 'k';
+        p.currentAlbum[0] = 'k';
     }
 }
 
@@ -359,7 +365,7 @@ void toggleGodMode() {
 // /[1-9]/[01-99].mp3
 void loadAlbum() {
     char folder[6];
-    sprintf(folder, "/%s/", currentAlbum);
+    sprintf(folder, "/%s/", p.currentAlbum);
 
     DPRINTF("Loading files from directory: ");
     DPRINTLN(folder);
@@ -389,14 +395,14 @@ void loadAlbum() {
 
         // TODO: sorting
 
-        album[i] = malloc(strlen(entry.name()) + 1);
-        strcpy(album[i], entry.name());
+        p.album[i] = malloc(strlen(entry.name()) + 1);
+        strcpy(p.album[i], entry.name());
         i++;
 
         entry.close();
     }
 
-    currentAlbumTrackCount = i;
+    p.currentAlbumTrackCount = i;
 }
 
 // ##################################
@@ -419,7 +425,7 @@ void handleSerial() {
             case '9':
                 DPRINTF("Received Command: PLAY ");
                 DPRINTLN(c);
-                currentAlbum[2] = c;
+                p.currentAlbum[2] = c;
                 if (!detectGodMode(c)) {
                     playAlbum();
                 };
