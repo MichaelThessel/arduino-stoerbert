@@ -58,6 +58,7 @@ Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
 const uint8_t MAX_TRACKS = 30;
+const uint8_t DEBOUNCE_DELAY = 200;
 
 uint8_t volume = 50; // Volume level
 char *album[MAX_TRACKS]; // Album track buffer
@@ -70,6 +71,10 @@ bool isGodMode = false; // Whether or not god mode is enabled
 
 uint8_t sr1State = 0;
 uint8_t sr2State = 0;
+uint8_t sr1StatePrevious = -1;
+uint8_t sr2StatePrevious = -1;
+unsigned long sr1LastDebounceTime = 0;
+unsigned long sr2LastDebounceTime = 0;
 
 void setup() {
     setupSerial();
@@ -138,6 +143,17 @@ void handleButtons() {
     sr2State = shiftIn();
     //DPRINTBINLN(sr1State);
     //DPRINTBINLN(sr2State);
+
+    if (debounce(&sr1State, &sr1StatePrevious, &sr1LastDebounceTime)) {
+        if (sr1State & 0b00001000) {
+            togglePlayPause();
+        }
+
+        if (sr1State & 0b10000000) {
+            currentAlbum[2] = '1';
+            playAlbum();
+        }
+    }
 }
 
 // ##################################
@@ -180,7 +196,7 @@ void setVolume(uint8_t volume) {
 // ##################################
 
 // Toggle Play/Pause
-void playTogglePause() {
+void togglePlayPause() {
     if (musicPlayer.paused()) {
         musicPlayer.pausePlaying(false);
     } else {
@@ -394,7 +410,7 @@ void handleSerial() {
             // Toggle play/pause
             case 'p':
                 DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
-                playTogglePause();
+                togglePlayPause();
                 break;
 
             // Next track
@@ -454,4 +470,25 @@ byte shiftIn() {
     }
 
     return data;
+}
+
+// Debounce button presses
+bool debounce(uint8_t *current, uint8_t *previous, unsigned long *time) {
+    // First run
+    if (*previous == -1) {
+        *previous = *current;
+        return false;
+    }
+
+    if (*current != *previous) {
+        *previous = *current;
+
+        if ((millis() - *time) > DEBOUNCE_DELAY) {
+            return true;
+        }
+
+        *time = millis();
+    }
+
+    return false;
 }
