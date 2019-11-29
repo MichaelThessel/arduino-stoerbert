@@ -2,17 +2,11 @@
 TODO:
 
 * File sorting/file name based playback
-* Mono Mode
 * God mode album select
-* Button handling:
- * Play/Pause
- * Forward
- * Backward
- * Album select regular
- * Album select god mode
 * Sleep mode
 * Save current track on EEPROM
 
+Mono Mode
 Reseach if headphone jack is possible
 
 */
@@ -64,19 +58,19 @@ uint8_t volume = 50; // Volume level
 
 // Player holds current player state
 struct player {
-    char *album[MAX_TRACKS]; // Album track buffer
-    char currentAlbum[4]; // Currently selected album
+    char *album[MAX_TRACKS];        // Album track buffer
+    char currentAlbum[4];           // Currently selected album
     uint8_t currentAlbumTrackCount; // Track count for currently selected album
-    uint8_t currentTrack; // Current track
-    bool isPlaying; // Whether or not there is currently an album playing
-    uint8_t godModeFlag; // God detction mode flag
-    bool isGodMode; // Whether or not god mode is enabled
+    uint8_t currentTrack;           // Current track
+    bool isPlaying;                 // Whether or not there is currently an album playing
+    uint8_t godModeFlag;            // God detction mode flag
+    bool isGodMode;                 // Whether or not god mode is enabled
 } p = {{}, "k01", 0, 0, false, 0, false};
 
 // Shift register states
 struct sr {
-    uint8_t state; // Shift register current state
-    uint8_t previous; // Shift register previous state
+    uint8_t state;              // Shift register current state
+    uint8_t previous;           // Shift register previous state
     unsigned long debounceTime; // Shift register time since last debounce
 } sr1, sr2 = {0, -1, 0};
 
@@ -99,6 +93,23 @@ struct srAssignments {
     const uint8_t buttonNext        = 0b00010000;
 };
 srAssignments sra;
+
+// Command to character mappings
+const char COMMAND1                 = '1';
+const char COMMAND2                 = '2';
+const char COMMAND3                 = '3';
+const char COMMAND4                 = '4';
+const char COMMAND5                 = '5';
+const char COMMAND6                 = '6';
+const char COMMAND7                 = '7';
+const char COMMAND8                 = '8';
+const char COMMAND9                 = '9';
+const char COMMAND_PLAY_PAUSE       = 'p';
+const char COMMAND_PREVIOUS         = 'b';
+const char COMMAND_NEXT             = 'f';
+const char COMMAND_GOD_MODE         = 'g';
+const char COMMAND_INCREASE_VOLUME  = '+';
+const char COMMAND_DECREASE_VOLUME  = '-';
 
 // ##################################
 // Setup
@@ -168,15 +179,21 @@ void handleButtons() {
     sr2.state = shiftIn(false);
 
     if (debounce(&sr1.state, &sr1.previous, &sr1.debounceTime)) {
-        if (sr1.state & sra.button1) {
-            handleCommand('1');
-        }
+        if (sr1.state & sra.button1) { handleCommand(COMMAND1); }
+        if (sr1.state & sra.button2) { handleCommand(COMMAND2); }
+        if (sr1.state & sra.button3) { handleCommand(COMMAND3); }
+        if (sr1.state & sra.button4) { handleCommand(COMMAND4); }
+        if (sr1.state & sra.button5) { handleCommand(COMMAND5); }
+        if (sr1.state & sra.button6) { handleCommand(COMMAND6); }
+        if (sr1.state & sra.button7) { handleCommand(COMMAND7); }
+        if (sr1.state & sra.button8) { handleCommand(COMMAND8); }
     }
 
     if (debounce(&sr2.state, &sr2.previous, &sr2.debounceTime)) {
-        if (sr2.state & sra.buttonPlayPause) {
-            handleCommand('p');
-        }
+        if (sr2.state & sra.button9) { handleCommand(COMMAND8); }
+        if (sr2.state & sra.buttonPlayPause) { handleCommand(COMMAND_PLAY_PAUSE); }
+        if (sr2.state & sra.buttonPrevious) { handleCommand(COMMAND_PREVIOUS); }
+        if (sr2.state & sra.buttonNext) { handleCommand(COMMAND_NEXT); }
     }
 }
 
@@ -405,15 +422,15 @@ void loadAlbum() {
 void handleCommand(char c) {
     switch (c) {
         // Start playing
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
+        case COMMAND1:
+        case COMMAND2:
+        case COMMAND3:
+        case COMMAND4:
+        case COMMAND5:
+        case COMMAND6:
+        case COMMAND7:
+        case COMMAND8:
+        case COMMAND9:
             DPRINTF("Received Command: PLAY ");
             DPRINTLN(c);
             p.currentAlbum[2] = c;
@@ -423,37 +440,37 @@ void handleCommand(char c) {
             break;
 
         // GOD mode !!!
-        case 'g':
+        case COMMAND_GOD_MODE:
             DPRINTLNF("Received Command: God Mode");
             toggleGodMode();
             break;
 
         // Toggle play/pause
-        case 'p':
+        case COMMAND_PLAY_PAUSE:
             DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
             togglePlayPause();
             break;
 
         // Next track
-        case 'f':
+        case COMMAND_NEXT:
             DPRINTLNF("Received Command: NEXT TRACK");
             playNextTrack();
             break;
 
         // Previous track
-        case 'b':
+        case COMMAND_PREVIOUS:
             DPRINTLNF("Received Command: PREVIOUS TRACK");
             playPreviousTrack();
             break;
 
         // Increase volume
-        case '+':
+        case COMMAND_INCREASE_VOLUME:
             DPRINTLNF("Received Command: VOLUME +");
             increaseVolume();
             break;
 
         // Decrease volume
-        case '-':
+        case COMMAND_DECREASE_VOLUME:
             DPRINTLNF("Received Command: VOLUME -");
             decreaseVolume();
             break;
