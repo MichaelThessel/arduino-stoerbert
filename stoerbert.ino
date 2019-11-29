@@ -58,7 +58,7 @@ Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
 const uint8_t MAX_TRACKS = 30;
-const uint8_t DEBOUNCE_DELAY = 255;
+const uint16_t DEBOUNCE_DELAY = 1000;
 
 uint8_t volume = 50; // Volume level
 
@@ -164,24 +164,18 @@ void handleButtons() {
     setVolume(map(analogRead(PIN_VOLUME), 0, 1023, 0, VOLUME_MIN));
 
     // Handle button shift registers
-    digitalWrite(PIN_SR_LATCH, 1);
-    delayMicroseconds(20);
-    digitalWrite(PIN_SR_LATCH, 0);
-    sr1.state = shiftIn();
-    sr2.state = shiftIn();
-    //DPRINTBINLN(sr1.state);
-    //DPRINTBINLN(sr2.state);
+    sr1.state = shiftIn(true);
+    sr2.state = shiftIn(false);
 
     if (debounce(&sr1.state, &sr1.previous, &sr1.debounceTime)) {
         if (sr1.state & sra.button1) {
-            p.currentAlbum[2] = '1';
-            playAlbum();
+            handleCommand('1');
         }
     }
 
     if (debounce(&sr2.state, &sr2.previous, &sr2.debounceTime)) {
         if (sr2.state & sra.buttonPlayPause) {
-            togglePlayPause();
+            handleCommand('p');
         }
     }
 }
@@ -406,77 +400,73 @@ void loadAlbum() {
 }
 
 // ##################################
-// Serial controls
+// Commands
 // ##################################
-void handleSerial() {
-    if (Serial.available()) {
-        char c = Serial.read();
+void handleCommand(char c) {
+    switch (c) {
+        // Start playing
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            DPRINTF("Received Command: PLAY ");
+            DPRINTLN(c);
+            p.currentAlbum[2] = c;
+            if (!detectGodMode(c)) {
+                playAlbum();
+            };
+            break;
 
-        switch (c) {
-            // Start playing
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                DPRINTF("Received Command: PLAY ");
-                DPRINTLN(c);
-                p.currentAlbum[2] = c;
-                if (!detectGodMode(c)) {
-                    playAlbum();
-                };
-                break;
+        // GOD mode !!!
+        case 'g':
+            DPRINTLNF("Received Command: God Mode");
+            toggleGodMode();
+            break;
 
-            // GOD mode !!!
-            case 'g':
-                DPRINTLNF("Received Command: God Mode");
-                toggleGodMode();
-                break;
+        // Toggle play/pause
+        case 'p':
+            DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
+            togglePlayPause();
+            break;
 
-            // Toggle play/pause
-            case 'p':
-                DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
-                togglePlayPause();
-                break;
+        // Next track
+        case 'f':
+            DPRINTLNF("Received Command: NEXT TRACK");
+            playNextTrack();
+            break;
 
-            // Next track
-            case 'f':
-                DPRINTLNF("Received Command: NEXT TRACK");
-                playNextTrack();
-                break;
+        // Previous track
+        case 'b':
+            DPRINTLNF("Received Command: PREVIOUS TRACK");
+            playPreviousTrack();
+            break;
 
-            // Previous track
-            case 'b':
-                DPRINTLNF("Received Command: PREVIOUS TRACK");
-                playPreviousTrack();
-                break;
+        // Increase volume
+        case '+':
+            DPRINTLNF("Received Command: VOLUME +");
+            increaseVolume();
+            break;
 
-            // Increase volume
-            case '+':
-                DPRINTLNF("Received Command: VOLUME +");
-                increaseVolume();
-                break;
+        // Decrease volume
+        case '-':
+            DPRINTLNF("Received Command: VOLUME -");
+            decreaseVolume();
+            break;
 
-            // Decrease volume
-            case '-':
-                DPRINTLNF("Received Command: VOLUME -");
-                decreaseVolume();
-                break;
+        // Ignore newlines
+        case '\n':
+            break;
 
-            // Ignore newlines
-            case '\n':
-                break;
-
-            // Log invalid commands
-            default:
-                DPRINTF("Invalid command: ");
-                DPRINTLN(c);
-                break;
-        }
+        // Log invalid commands
+        default:
+            DPRINTF("Invalid command: ");
+            DPRINTLN(c);
+            break;
     }
 }
 
@@ -486,8 +476,14 @@ void handleSerial() {
 
 // Returns current shift register state as byte
 // Bit 7 = Pin 7 / Bit 0= Pin 0
-byte shiftIn() {
+byte shiftIn(bool doLatch) {
     byte data = 0;
+
+    if (doLatch) {
+        digitalWrite(PIN_SR_LATCH, 1);
+        delayMicroseconds(20);
+        digitalWrite(PIN_SR_LATCH, 0);
+    }
 
     for (int i = 7; i >= 0; i--) {
         digitalWrite(PIN_SR_CLOCK, 0);
@@ -498,6 +494,8 @@ byte shiftIn() {
         digitalWrite(PIN_SR_CLOCK, 1);
 
     }
+
+    //DPRINTBINLN(data);
 
     return data;
 }
@@ -521,4 +519,14 @@ bool debounce(uint8_t *current, uint8_t *previous, unsigned long *time) {
     }
 
     return false;
+}
+
+// ##################################
+// Serial controls
+// ##################################
+void handleSerial() {
+    if (Serial.available()) {
+        char c = Serial.read();
+        handleCommand(c);
+    }
 }
