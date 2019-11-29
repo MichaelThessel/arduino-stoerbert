@@ -58,7 +58,7 @@ Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
 const uint8_t MAX_TRACKS = 30;
-const uint8_t DEBOUNCE_DELAY = 500;
+const uint8_t DEBOUNCE_DELAY = 255;
 
 uint8_t volume = 50; // Volume level
 
