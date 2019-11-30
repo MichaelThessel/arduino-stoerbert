@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <SD.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "pins.h"
 #include "debug.h"
@@ -23,6 +24,14 @@ Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
 // ##################################
 // File handling
 // ##################################
+
+// Detect sequence in album based on filename
+int detectFileSequence(char *fileName) {
+    char s[3];
+    s[0] = fileName[0];
+    s[1] = fileName[1];
+    return atoi(s) - 1;
+}
 
 // Load album files
 // Directory and file structure needs to be:
@@ -50,6 +59,7 @@ void loadAlbum() {
             continue;
         }
 
+        DPRINTF("Found file: ");
         DPRINTLN(entry.name());
 
         if (!musicPlayer.isMP3File(entry.name())) {
@@ -57,10 +67,12 @@ void loadAlbum() {
             continue;
         }
 
-        // TODO: sorting
+        int sequence = detectFileSequence(entry.name());
+        DPRINTF("Adding file to position: ");
+        DPRINTLN(sequence);
 
-        p.album[i] = malloc(strlen(entry.name()) + 1);
-        strcpy(p.album[i], entry.name());
+        p.album[sequence] = malloc(strlen(entry.name()) + 1);
+        strcpy(p.album[sequence], entry.name());
         i++;
 
         entry.close();
@@ -119,6 +131,12 @@ void resetPlayback() {
 void playFile() {
     char path[99];
     sprintf(path, "/%s/%s", p.currentAlbum, p.album[p.currentTrack]);
+
+    if (!SD.exists(path)) {
+        DPRINTF("File missing: ");
+        DPRINTLN(path);
+        return;
+    }
 
     DPRINTF("Playing file ");
     DPRINTLN(path);

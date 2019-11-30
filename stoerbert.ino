@@ -1,7 +1,6 @@
 /**
 TODO:
 
-* File sorting/file name based playback
 * God mode album select
 * Sleep mode
 * Save current track on EEPROM
