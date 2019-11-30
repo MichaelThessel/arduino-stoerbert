@@ -71,6 +71,7 @@ void loadAlbum() {
         DPRINTF("Adding file to position: ");
         DPRINTLN(sequence);
 
+        free(p.album[sequence]);
         p.album[sequence] = malloc(strlen(entry.name()) + 1);
         strcpy(p.album[sequence], entry.name());
         i++;
@@ -132,6 +133,8 @@ void playFile() {
     char path[99];
     sprintf(path, "/%s/%s", p.currentAlbum, p.album[p.currentTrack]);
 
+    musicPlayer.stopPlaying();
+
     if (!SD.exists(path)) {
         DPRINTF("File missing: ");
         DPRINTLN(path);
@@ -160,7 +163,6 @@ void playNextTrack() {
     }
 
     p.currentTrack++;
-    musicPlayer.stopPlaying();
     playFile();
 }
 
@@ -171,7 +173,6 @@ void playPreviousTrack() {
     }
 
     p.currentTrack--;
-    musicPlayer.stopPlaying();
     playFile();
 }
 
