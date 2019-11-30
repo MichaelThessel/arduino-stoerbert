@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+const uint16_t DEBOUNCE_DELAY = 1000;
+
 // Shift register states
 struct sr {
     uint8_t state; // Shift register current state

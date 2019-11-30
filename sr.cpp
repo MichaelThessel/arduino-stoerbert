@@ -5,8 +5,6 @@
 #include "pins.h"
 #include "commands.h"
 
-const uint16_t DEBOUNCE_DELAY = 1000;
-
 sr sr1, sr2 = {0, -1, 0};
 
 srAssignments sra = {
