@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-const uint16_t DEBOUNCE_DELAY = 1000;
+const uint16_t DEBOUNCE_DELAY = 500;
 
 // Shift register states
 struct sr {

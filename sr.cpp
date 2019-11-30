@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "pins.h"
 #include "commands.h"
+#include "debug.h"
 
 sr sr1, sr2 = {0, -1, 0};
 
@@ -71,10 +72,9 @@ bool debounce(sr *srd) {
         srd->previous = srd->state;
 
         if ((millis() - srd->debounceTime) > DEBOUNCE_DELAY) {
+            srd->debounceTime = millis();
             return true;
         }
-
-        srd->debounceTime = millis();
     }
 
     return false;
