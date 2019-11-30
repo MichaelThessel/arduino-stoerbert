@@ -16,6 +16,8 @@ Reseach if headphone jack is possible
 
 #include "pins.h"
 #include "debug.h"
+#include "commands.h"
+#include "sr.h"
 
 Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
     PIN_VS1053_SHIELD_RESET,
@@ -28,7 +30,11 @@ Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
 const uint8_t VOLUME_STEP = 10;
 const uint8_t VOLUME_MIN = 75;
 const uint8_t MAX_TRACKS = 30;
-const uint16_t DEBOUNCE_DELAY = 1000;
+
+extern const uint16_t DEBOUNCE_DELAY;
+extern sr sr1;
+extern sr sr2;
+extern srAssignments sra;
 
 uint8_t volume = 50; // Volume level
 
@@ -43,58 +49,14 @@ struct player {
     bool isGodMode;                 // Whether or not god mode is enabled
 } p = {{}, "k01", 0, 0, false, 0, false};
 
-// Shift register states
-struct sr {
-    uint8_t state;              // Shift register current state
-    uint8_t previous;           // Shift register previous state
-    unsigned long debounceTime; // Shift register time since last debounce
-} sr1, sr2 = {0, -1, 0};
-
-// Shift register button - pin mappings
-struct srAssignments {
-    // Shift register 1
-    const uint8_t button1           = 0b10000000;
-    const uint8_t button2           = 0b01000000;
-    const uint8_t button3           = 0b00100000;
-    const uint8_t button4           = 0b00010000;
-    const uint8_t button5           = 0b00001000;
-    const uint8_t button6           = 0b00000100;
-    const uint8_t button7           = 0b00000010;
-    const uint8_t button8           = 0b00000001;
-
-    // Shift register 2
-    const uint8_t button9           = 0b10000000;
-    const uint8_t buttonPlayPause   = 0b01000000;
-    const uint8_t buttonPrevious    = 0b00100000;
-    const uint8_t buttonNext        = 0b00010000;
-};
-srAssignments sra;
-
-// Command to character mappings
-const char COMMAND1                 = '1';
-const char COMMAND2                 = '2';
-const char COMMAND3                 = '3';
-const char COMMAND4                 = '4';
-const char COMMAND5                 = '5';
-const char COMMAND6                 = '6';
-const char COMMAND7                 = '7';
-const char COMMAND8                 = '8';
-const char COMMAND9                 = '9';
-const char COMMAND_PLAY_PAUSE       = 'p';
-const char COMMAND_PREVIOUS         = 'b';
-const char COMMAND_NEXT             = 'f';
-const char COMMAND_GOD_MODE         = 'g';
-const char COMMAND_INCREASE_VOLUME  = '+';
-const char COMMAND_DECREASE_VOLUME  = '-';
 
 // ##################################
 // Setup
 // ##################################
-
 void setup() {
     setupSerial();
     setupVS1053();
-    setupButtons();
+    setupSr();
 }
 
 // Set up serial connection
@@ -106,6 +68,10 @@ void setupSerial() {
 
 // Set up player
 void setupVS1053() {
+    // Set up volume knob
+    pinMode(PIN_VOLUME, INPUT);
+    setVolume(volume);
+
     if (!musicPlayer.begin()) {
         DPRINTLNF("Couldn't find VS1053");
         while (1);
@@ -120,17 +86,6 @@ void setupVS1053() {
     musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);
 }
 
-void setupButtons() {
-    // Set up volume knob
-    pinMode(PIN_VOLUME, INPUT);
-    setVolume(volume);
-
-    // Set up shift registers for buttons
-    pinMode(PIN_SR_LATCH, OUTPUT);
-    pinMode(PIN_SR_CLOCK, OUTPUT);
-    pinMode(PIN_SR_DATA, INPUT);
-}
-
 // ##################################
 // Main loop
 // ##################################
@@ -140,21 +95,21 @@ void loop() {
     handleSerial();
     #endif
 
-    advanceTrack();
+    // Handle volume pot
+    setVolume(map(analogRead(PIN_VOLUME), 0, 1023, 0, VOLUME_MIN));
 
     handleButtons();
+
+    advanceTrack();
 }
 
 // Button handling
 void handleButtons() {
-    // Handle volume pot
-    setVolume(map(analogRead(PIN_VOLUME), 0, 1023, 0, VOLUME_MIN));
-
     // Handle button shift registers
-    sr1.state = shiftIn(true);
-    sr2.state = shiftIn(false);
+    sr1.state = srShiftIn(true);
+    sr2.state = srShiftIn(false);
 
-    if (debounce(&sr1.state, &sr1.previous, &sr1.debounceTime)) {
+    if (debounce(&sr1)) {
         if (sr1.state & sra.button1) { handleCommand(COMMAND1); }
         if (sr1.state & sra.button2) { handleCommand(COMMAND2); }
         if (sr1.state & sra.button3) { handleCommand(COMMAND3); }
@@ -165,7 +120,7 @@ void handleButtons() {
         if (sr1.state & sra.button8) { handleCommand(COMMAND8); }
     }
 
-    if (debounce(&sr2.state, &sr2.previous, &sr2.debounceTime)) {
+    if (debounce(&sr2)) {
         if (sr2.state & sra.button9) { handleCommand(COMMAND8); }
         if (sr2.state & sra.buttonPlayPause) { handleCommand(COMMAND_PLAY_PAUSE); }
         if (sr2.state & sra.buttonPrevious) { handleCommand(COMMAND_PREVIOUS); }
@@ -461,57 +416,6 @@ void handleCommand(char c) {
             DPRINTLN(c);
             break;
     }
-}
-
-// ##################################
-// Helper functions
-// ##################################
-
-// Returns current shift register state as byte
-// Bit 7 = Pin 7 / Bit 0= Pin 0
-byte shiftIn(bool doLatch) {
-    byte data = 0;
-
-    if (doLatch) {
-        digitalWrite(PIN_SR_LATCH, 1);
-        delayMicroseconds(20);
-        digitalWrite(PIN_SR_LATCH, 0);
-    }
-
-    for (int i = 7; i >= 0; i--) {
-        digitalWrite(PIN_SR_CLOCK, 0);
-        delayMicroseconds(2);
-        if (digitalRead(PIN_SR_DATA)) {
-            data = data | (1 << i);
-        }
-        digitalWrite(PIN_SR_CLOCK, 1);
-
-    }
-
-    //DPRINTBINLN(data);
-
-    return data;
-}
-
-// Debounce button presses
-bool debounce(uint8_t *current, uint8_t *previous, unsigned long *time) {
-    // First run
-    if (*previous == -1) {
-        *previous = *current;
-        return false;
-    }
-
-    if (*current != *previous) {
-        *previous = *current;
-
-        if ((millis() - *time) > DEBOUNCE_DELAY) {
-            return true;
-        }
-
-        *time = millis();
-    }
-
-    return false;
 }
 
 // ##################################
