@@ -240,9 +240,7 @@ void handlePlayer() {
 void toggleGodMode() {
     resetPlayback();
 
-    musicPlayer.stopPlaying();
-    musicPlayer.sineTest(150, 1000);
-    delay(1000);
+    musicPlayer.sineTest(150, 500);
     musicPlayer.stopPlaying();
 
     p.isGodMode = !p.isGodMode;
