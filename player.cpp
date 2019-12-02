@@ -9,6 +9,7 @@
 
 #include "pins.h"
 #include "debug.h"
+#include "power.h"
 
 uint8_t volume = 50; // Current Volume level
 player p = {{}, "k01", 0, 0, false, 0, false};
@@ -183,6 +184,7 @@ void setAlbum(char c) {
 
 // Play album
 void playAlbum() {
+    resetPower();
     loadAlbum();
 
     if (p.currentAlbumTrackCount == 0) {
@@ -214,8 +216,9 @@ void advanceTrack()
 
     // Exit if we reached the last track
     if (p.currentTrack == p.currentAlbumTrackCount - 1) {
-        resetPlayback();
         DPRINTLNF("End of album reached");
+        resetPlayback();
+        setLowPower();
         return;
     }
 

@@ -16,6 +16,7 @@ Reseach if headphone jack is possible
 #include "commands.h"
 #include "sr.h"
 #include "player.h"
+#include "power.h"
 
 extern sr sr1;
 extern sr sr2;
@@ -28,6 +29,8 @@ void setup() {
     #ifdef DEBUG
     Serial.begin(9600);
     #endif
+
+    setupPower();
     setupPlayer();
     setupSr();
 }
