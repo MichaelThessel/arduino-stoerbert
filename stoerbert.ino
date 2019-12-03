@@ -71,7 +71,7 @@ void handleButtons() {
     }
 
     if (debounce(&sr2)) {
-        if (sr2.state & sra.button9) { handleCommand(COMMAND8); }
+        if (sr2.state & sra.button9) { handleCommand(COMMAND9); }
         if (sr2.state & sra.buttonPlayPause) { handleCommand(COMMAND_PLAY_PAUSE); }
         if (sr2.state & sra.buttonPrevious) { handleCommand(COMMAND_PREVIOUS); }
         if (sr2.state & sra.buttonNext) { handleCommand(COMMAND_NEXT); }
