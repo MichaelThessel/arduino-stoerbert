@@ -16,6 +16,7 @@ struct player {
     bool isPlaying;                 // Whether or not there is currently an album playing
     uint8_t godModeFlag;            // God detction mode flag
     bool isGodMode;                 // Whether or not god mode is enabled
+    uint8_t volume;                 // Current Volume level
 };
 
 void setupPlayer();

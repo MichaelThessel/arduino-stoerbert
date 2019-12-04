@@ -11,8 +11,7 @@
 #include "debug.h"
 #include "power.h"
 
-uint8_t volume = 50; // Current Volume level
-player p = {{}, "k01", 0, 0, false, 0, false};
+player p = {{}, "k01", 0, 0, false, 0, false, 50};
 
 Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
     PIN_VS1053_SHIELD_RESET,
@@ -89,33 +88,33 @@ void loadAlbum() {
 
 // Set volume
 void setVolume(uint8_t volume) {
-    if (volume > VOLUME_MIN) {
-        volume = VOLUME_MIN;
+    if (p.volume > VOLUME_MIN) {
+        p.volume = VOLUME_MIN;
     }
 
     //DPRINTF("Setting volume to: ");
-    //DPRINTLN(volume);
-    musicPlayer.setVolume(volume, volume);
+    //DPRINTLN(p.volume);
+    musicPlayer.setVolume(p.volume, p.volume);
 }
 
 // Increase volume
 void increaseVolume() {
-    if (volume - VOLUME_STEP < 0) {
-        volume = 0;
+    if (p.volume - VOLUME_STEP < 0) {
+        p.volume = 0;
     } else {
-        volume -= VOLUME_STEP;
+        p.volume -= VOLUME_STEP;
     }
-    setVolume(volume);
+    setVolume(p.volume);
 }
 
 // Decrease volume
 void decreaseVolume() {
-    if (volume + VOLUME_STEP > VOLUME_MIN) {
-        volume = VOLUME_MIN;
+    if (p.volume + VOLUME_STEP > VOLUME_MIN) {
+        p.volume = VOLUME_MIN;
     } else {
-        volume += VOLUME_STEP;
+        p.volume += VOLUME_STEP;
     }
-    setVolume(volume);
+    setVolume(p.volume);
 }
 
 // ##################################
@@ -227,10 +226,6 @@ void advanceTrack()
 
 // Set up player
 void setupPlayer() {
-    // Set up volume knob
-    pinMode(PIN_VOLUME, INPUT);
-    setVolume(volume);
-
     if (!musicPlayer.begin()) {
         DPRINTLNF("Couldn't find VS1053");
         while (1);
@@ -243,6 +238,10 @@ void setupPlayer() {
     }
 
     musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);
+
+    // Set up volume knob
+    pinMode(PIN_VOLUME, INPUT);
+    setVolume(p.volume);
 }
 
 // Handle player state
