@@ -87,7 +87,7 @@ void loadAlbum() {
 // ##################################
 
 // Set volume
-void setVolume(uint8_t volume) {
+void setVolume() {
     if (p.volume > VOLUME_MIN) {
         p.volume = VOLUME_MIN;
     }
@@ -104,7 +104,7 @@ void increaseVolume() {
     } else {
         p.volume -= VOLUME_STEP;
     }
-    setVolume(p.volume);
+    setVolume();
 }
 
 // Decrease volume
@@ -114,7 +114,7 @@ void decreaseVolume() {
     } else {
         p.volume += VOLUME_STEP;
     }
-    setVolume(p.volume);
+    setVolume();
 }
 
 // ##################################
@@ -241,13 +241,14 @@ void setupPlayer() {
 
     // Set up volume knob
     pinMode(PIN_VOLUME, INPUT);
-    setVolume(p.volume);
+    setVolume();
 }
 
 // Handle player state
 void handlePlayer() {
     // Handle volume pot
-    setVolume(map(analogRead(PIN_VOLUME), 0, 1023, 0, VOLUME_MIN));
+    p.volume = map(analogRead(PIN_VOLUME), 0, 1023, 0, VOLUME_MIN);
+    setVolume();
 
     advanceTrack();
 }
