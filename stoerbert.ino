@@ -2,6 +2,7 @@
  TODO:
  * God mode album select
  * Sleep mode
+ * Power on reminder beep when not playing
 */
 #include <Adafruit_VS1053.h>
 
