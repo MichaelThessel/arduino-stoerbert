@@ -1,13 +1,7 @@
 /**
-TODO:
-
-* God mode album select
-* Sleep mode
-* Save current track on EEPROM
-
-Mono Mode
-Reseach if headphone jack is possible
-
+ TODO:
+ * God mode album select
+ * Sleep mode
 */
 #include <Adafruit_VS1053.h>
 

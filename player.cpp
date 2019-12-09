@@ -4,14 +4,16 @@
 #include <Adafruit_VS1053.h>
 #include <Arduino.h>
 #include <SD.h>
+#include <EEPROM.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "pins.h"
 #include "debug.h"
 #include "power.h"
 
-player p = {{}, "k01", 0, 0, false, 0, false, 50};
+player p = {{}, "k01", 0, 0, false, 0, false, 50, false};
 
 Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
     PIN_VS1053_SHIELD_RESET,
@@ -117,6 +119,77 @@ void decreaseVolume() {
     setVolume();
 }
 
+
+// ##################################
+// EEPROM state saving
+// ##################################
+
+// Save current player state to EEPROM
+// We need to save 4 bytes to EEPROM
+// Bytes 1-3: Current album name (i.e "k01")
+// Byte 4: Current track
+void saveState() {
+    uint8_t i = 0;
+
+    // Save current album
+    DPRINTF("Saving album to EEPROM: ");
+    for (; i < FOLDER_NAME_LENGTH - 1; i++) {
+        EEPROM.write(i, p.currentAlbum[i]);
+        DPRINT(i);
+        DPRINTF("->");
+        DPRINT(p.currentAlbum[i]);
+        DPRINTF(" ");
+    }
+    DPRINTLNF("");
+
+    // Save the current track
+    EEPROM.write(i, p.currentTrack);
+    DPRINTF("Saving track to EEPROM: ");
+    DPRINT(i);
+    DPRINTF("->");
+    DPRINTLN(p.currentTrack);
+}
+
+// Load current player state from EEPROM
+bool loadState() {
+    bool valid = false;
+    uint8_t i = 0;
+
+    // Load current album
+    char currentAlbum[FOLDER_NAME_LENGTH];
+    for (; i < FOLDER_NAME_LENGTH - 1; i++) {
+        currentAlbum[i] = EEPROM.read(i);
+        if (currentAlbum[i] != 0) {
+            valid = true;
+        }
+    }
+    currentAlbum[i] = '\0';
+
+    if (!valid) {
+        return valid;
+    }
+
+    strcpy(p.currentAlbum, currentAlbum);
+
+    DPRINTF("Loaded album from EEPROM: ");
+    DPRINTLN(p.currentAlbum);
+
+    // Load the current track
+    p.currentTrack = EEPROM.read(i);
+
+    DPRINTF("Loaded track from EEPROM: ");
+    DPRINTLN(p.currentTrack);
+
+    return valid;
+}
+
+// Clear player state from EEPROM
+void clearState() {
+    for (int i = 0; i < FOLDER_NAME_LENGTH + 1; i++) {
+        EEPROM.write(i, 0);
+    }
+}
+
 // ##################################
 // Player controls
 // ##################################
@@ -126,6 +199,7 @@ void resetPlayback() {
     p.isPlaying = false;
     musicPlayer.stopPlaying();
     p.currentTrack = 0;
+    clearState();
 }
 
 // Play individual file
@@ -138,12 +212,16 @@ void playFile() {
     if (!SD.exists(path)) {
         DPRINTF("File missing: ");
         DPRINTLN(path);
+        resetPlayback();
         return;
     }
+
+    saveState();
 
     DPRINTF("Playing file ");
     DPRINTLN(path);
 
+    p.isPlaying = true;
     musicPlayer.startPlayingFile(path);
 }
 
@@ -181,6 +259,23 @@ void setAlbum(char c) {
     p.currentAlbum[2] = c;
 }
 
+// Resumes playback after power cycle
+void resumePlayback() {
+    if (p.hasResumed) {
+        return;
+    }
+    p.hasResumed = true;
+
+    if (loadState()) {
+        DPRINTLNF("Resuming playback");
+        if (p.currentAlbum[0] == 'g') {
+            p.isGodMode = true;
+        }
+        loadAlbum();
+        playFile();
+    }
+}
+
 // Play album
 void playAlbum() {
     resetPower();
@@ -192,7 +287,6 @@ void playAlbum() {
     }
 
     resetPlayback();
-    p.isPlaying = true;
 
     DPRINTF("Playing album ");
     DPRINTLN(p.currentAlbum);
@@ -250,6 +344,7 @@ void handlePlayer() {
     p.volume = map(analogRead(PIN_VOLUME), 0, 1023, 0, VOLUME_MIN);
     setVolume();
 
+    resumePlayback();
     advanceTrack();
 }
 
