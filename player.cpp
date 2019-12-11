@@ -11,9 +11,8 @@
 
 #include "pins.h"
 #include "debug.h"
-#include "power.h"
 
-player p = {{}, "k01", 0, 0, false, 0, false, 50, false};
+player p = {{}, "k01", 0, 0, false, 0, false, 50, false, 0};
 
 Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
     PIN_VS1053_SHIELD_RESET,
@@ -191,6 +190,37 @@ void clearState() {
 }
 
 // ##################################
+// Power reminder
+// ##################################
+
+// Set when to play the next power reminder
+void setPowerReminder() {
+    p.powerReminderDelay = millis() + POWER_REMINDER_PERIOD;
+}
+
+// Play the power reminder
+void powerReminder() {
+    if (p.isPlaying || p.powerReminderDelay == 0) {
+        setPowerReminder();
+        return;
+    }
+
+    if (p.powerReminderDelay > millis()) {
+        return;
+    }
+
+    DPRINTLNF("Playing power reminder");
+
+    for (uint8_t i = 0; i < 3; i++) {
+        musicPlayer.sineTest(1000, 500);
+        musicPlayer.stopPlaying();
+        delay(500);
+    }
+
+    setPowerReminder();
+}
+
+// ##################################
 // Player controls
 // ##################################
 
@@ -278,7 +308,6 @@ void resumePlayback() {
 
 // Play album
 void playAlbum() {
-    resetPower();
     loadAlbum();
 
     if (p.currentAlbumTrackCount == 0) {
@@ -311,7 +340,6 @@ void advanceTrack()
     if (p.currentTrack == p.currentAlbumTrackCount - 1) {
         DPRINTLNF("End of album reached");
         resetPlayback();
-        setLowPower();
         return;
     }
 
@@ -345,6 +373,7 @@ void handlePlayer() {
     setVolume();
 
     resumePlayback();
+    powerReminder();
     advanceTrack();
 }
 

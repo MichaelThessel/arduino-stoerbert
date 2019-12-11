@@ -9,7 +9,7 @@ const uint16_t DEBOUNCE_DELAY = 500;
 struct sr {
     uint8_t state; // Shift register current state
     int8_t previous; // Shift register previous state
-    unsigned long debounceTime; // Shift register time since last debounce
+    uint32_t debounceTime; // Shift register time since last debounce
 };
 
 // Shift register button - pin mappings

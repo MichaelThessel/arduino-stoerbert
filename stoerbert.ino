@@ -3,10 +3,9 @@
  * God mode album select
  * Sleep mode
    http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf
- * Power on reminder beep when not playing
  * Mono mode:
    https://github.com/sparkfun/LilyPad_MP3_Player/blob/7c8aa00545772183db7df8860a754d2f9288356a/Arduino/libraries/SFEMP3Shield/SFEMP3Shield.cpp#L989
-  */
+*/
 #include <Adafruit_VS1053.h>
 
 #include "pins.h"
