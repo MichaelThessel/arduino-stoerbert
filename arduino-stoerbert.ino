@@ -57,21 +57,21 @@ void handleButtons() {
     sr2.state = srShiftIn(false);
 
     if (debounce(&sr1)) {
-        if (sr1.state & sra.button1) { handleCommand(COMMAND1); }
         if (sr1.state & sra.button2) { handleCommand(COMMAND2); }
         if (sr1.state & sra.button3) { handleCommand(COMMAND3); }
-        if (sr1.state & sra.button4) { handleCommand(COMMAND4); }
         if (sr1.state & sra.button5) { handleCommand(COMMAND5); }
         if (sr1.state & sra.button6) { handleCommand(COMMAND6); }
-        if (sr1.state & sra.button7) { handleCommand(COMMAND7); }
-        if (sr1.state & sra.button8) { handleCommand(COMMAND8); }
+        if (sr1.state & sra.button9) { handleCommand(COMMAND9); }
+        if (sr1.state & sra.buttonNext) { handleCommand(COMMAND_NEXT); }
     }
 
     if (debounce(&sr2)) {
-        if (sr2.state & sra.button9) { handleCommand(COMMAND9); }
+        if (sr2.state & sra.button1) { handleCommand(COMMAND1); }
+        if (sr2.state & sra.button4) { handleCommand(COMMAND4); }
+        if (sr2.state & sra.button7) { handleCommand(COMMAND7); }
+        if (sr2.state & sra.button8) { handleCommand(COMMAND8); }
         if (sr2.state & sra.buttonPlayPause) { handleCommand(COMMAND_PLAY_PAUSE); }
         if (sr2.state & sra.buttonPrevious) { handleCommand(COMMAND_PREVIOUS); }
-        if (sr2.state & sra.buttonNext) { handleCommand(COMMAND_NEXT); }
     }
 }
 

@@ -15,20 +15,20 @@ struct sr {
 // Shift register button - pin mappings
 struct srAssignments {
     // Shift register 1
-    const uint8_t button1;
     const uint8_t button2;
     const uint8_t button3;
-    const uint8_t button4;
     const uint8_t button5;
     const uint8_t button6;
-    const uint8_t button7;
-    const uint8_t button8;
+    const uint8_t button9;
+    const uint8_t buttonNext;
 
     // Shift register 2
-    const uint8_t button9;
+    const uint8_t button1;
+    const uint8_t button4;
+    const uint8_t button7;
+    const uint8_t button8;
     const uint8_t buttonPlayPause;
     const uint8_t buttonPrevious;
-    const uint8_t buttonNext;
 };
 
 void setupSr();
