@@ -308,14 +308,14 @@ void resumePlayback() {
 
 // Play album
 void playAlbum() {
+    resetPlayback();
+
     loadAlbum();
 
     if (p.currentAlbumTrackCount == 0) {
         DPRINTLNF("No tracks found");
         return;
     }
-
-    resetPlayback();
 
     DPRINTF("Playing album ");
     DPRINTLN(p.currentAlbum);
