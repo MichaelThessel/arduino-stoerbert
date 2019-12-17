@@ -1,4 +1,6 @@
 /**
+ * Convert files to supported file format
+ *    a=`find ./ -type f | awk '{print "mv", "\""$0"\"", substr($0, 3, 2)".mp3;"}'`; eval $a
  TODO:
  * God mode album select
  * Sleep mode
