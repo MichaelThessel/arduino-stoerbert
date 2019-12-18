@@ -1,12 +1,3 @@
-/**
- * Convert files to supported file format
- *    a=`find ./ -type f | awk '{print "mv", "\""$0"\"", substr($0, 3, 2)".mp3;"}'`; eval $a
- TODO:
- * Sleep mode
-   http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf
- * Mono mode:
-   https://github.com/sparkfun/LilyPad_MP3_Player/blob/7c8aa00545772183db7df8860a754d2f9288356a/Arduino/libraries/SFEMP3Shield/SFEMP3Shield.cpp#L989
-*/
 #include <Adafruit_VS1053.h>
 
 #include "pins.h"
