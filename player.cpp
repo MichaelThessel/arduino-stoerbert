@@ -14,7 +14,7 @@
 #include "debug.h"
 #include "commands.h"
 
-player p = {{}, "k01", 0, 0, false, 0, false, 50, false, 0};
+player p = {{}, "k01", 0, 0, false, 0, false, 1, 50, false, 0};
 
 Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
     PIN_VS1053_SHIELD_RESET,
@@ -295,8 +295,27 @@ void playPreviousTrack() {
 }
 
 // Sets the current album
-void setAlbum(char c) {
-    p.currentAlbum[2] = c;
+bool setAlbum(char c) {
+    if (p.isGodMode) {
+        // God mode allows for 99 albums
+        // g01 - g99
+        // alternate which index to set
+        // album select in god mode requires two key presses
+        p.currentAlbum[p.godModeAlbumIndex] = c;
+        if (p.godModeAlbumIndex == 1) {
+            p.godModeAlbumIndex++;
+            return false;
+        } else {
+            p.godModeAlbumIndex--;
+            return true;
+        }
+    } else {
+        // Regular mode only has 9 albums
+        // k01 - k09
+        // so only 2nd index needs to be changed
+        p.currentAlbum[2] = c;
+        return true;
+    }
 }
 
 // Resumes playback after power cycle
@@ -430,4 +449,9 @@ bool detectGodMode(char c) {
 
     p.godModeFlag = 0;
     return false;
+}
+
+// Wether or not god mode is enabled
+bool isGodMode() {
+    return p.isGodMode;
 }

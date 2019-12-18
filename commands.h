@@ -2,6 +2,7 @@
 #define COMMANDS_H
 
 // Command to character mappings
+const char COMMAND0                 = '0';
 const char COMMAND1                 = '1';
 const char COMMAND2                 = '2';
 const char COMMAND3                 = '3';

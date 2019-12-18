@@ -2,7 +2,6 @@
  * Convert files to supported file format
  *    a=`find ./ -type f | awk '{print "mv", "\""$0"\"", substr($0, 3, 2)".mp3;"}'`; eval $a
  TODO:
- * God mode album select
  * Sleep mode
    http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf
  * Mono mode:
@@ -97,8 +96,9 @@ void handleCommand(char c) {
         case COMMAND9:
             DPRINTF("Received Command: PLAY ");
             DPRINTLN(c);
-            setAlbum(c);
-            playAlbum();
+            if (setAlbum(c)) {
+                playAlbum();
+            }
             break;
 
         // GOD mode !!!
@@ -109,26 +109,33 @@ void handleCommand(char c) {
 
         // Toggle play/pause
         case COMMAND_PLAY_PAUSE:
+            detectGodMode(c);
+
             DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
-            if (!detectGodMode(c)) {
-                togglePlayPause();
-            };
+            togglePlayPause();
             break;
 
         // Next track
         case COMMAND_NEXT:
+            if (detectGodMode(c)) {
+                break;
+            }
+
             DPRINTLNF("Received Command: NEXT TRACK");
-            if (!detectGodMode(c)) {
-                playNextTrack();
-            };
+            playNextTrack();
             break;
 
-        // Previous track
+        // Previous track / COMMAND0 in god mode
         case COMMAND_PREVIOUS:
+            detectGodMode(c);
+
+            if (isGodMode()) {
+                setAlbum(COMMAND0);
+                break;
+            }
+
             DPRINTLNF("Received Command: PREVIOUS TRACK");
-            if (!detectGodMode(c)) {
-                playPreviousTrack();
-            };
+            playPreviousTrack();
             break;
 
         // Increase volume

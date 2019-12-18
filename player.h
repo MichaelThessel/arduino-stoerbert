@@ -20,6 +20,7 @@ struct player {
     bool isPlaying;                         // Whether or not there is currently an album playing
     uint8_t godModeFlag;                    // God detction mode flag
     bool isGodMode;                         // Whether or not god mode is enabled
+    uint8_t godModeAlbumIndex;              // Which index to set when selecting the album in god mode
     uint8_t volume;                         // Current Volume level
     bool hasResumed;                        // Whether or not the player has tried to resume
     uint32_t powerReminderDelay;            // Time when to run the next power reminder
@@ -33,9 +34,10 @@ void decreaseVolume();
 void togglePlayPause();
 void playNextTrack();
 void playPreviousTrack();
-void setAlbum(char c);
+bool setAlbum(char c);
 void playAlbum();
 bool detectGodMode(char c);
 void toggleGodMode();
+bool isGodMode();
 
 #endif
