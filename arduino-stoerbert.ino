@@ -98,9 +98,7 @@ void handleCommand(char c) {
             DPRINTF("Received Command: PLAY ");
             DPRINTLN(c);
             setAlbum(c);
-            if (!detectGodMode(c)) {
-                playAlbum();
-            };
+            playAlbum();
             break;
 
         // GOD mode !!!
@@ -112,19 +110,25 @@ void handleCommand(char c) {
         // Toggle play/pause
         case COMMAND_PLAY_PAUSE:
             DPRINTLNF("Received Command: TOGGLE PLAY/PAUSE");
-            togglePlayPause();
+            if (!detectGodMode(c)) {
+                togglePlayPause();
+            };
             break;
 
         // Next track
         case COMMAND_NEXT:
             DPRINTLNF("Received Command: NEXT TRACK");
-            playNextTrack();
+            if (!detectGodMode(c)) {
+                playNextTrack();
+            };
             break;
 
         // Previous track
         case COMMAND_PREVIOUS:
             DPRINTLNF("Received Command: PREVIOUS TRACK");
-            playPreviousTrack();
+            if (!detectGodMode(c)) {
+                playPreviousTrack();
+            };
             break;
 
         // Increase volume

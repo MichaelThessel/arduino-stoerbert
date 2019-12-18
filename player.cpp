@@ -12,6 +12,7 @@
 
 #include "pins.h"
 #include "debug.h"
+#include "commands.h"
 
 player p = {{}, "k01", 0, 0, false, 0, false, 50, false, 0};
 
@@ -389,7 +390,7 @@ void handlePlayer() {
 
 // ##################################
 // Handles the god mode
-// Sequence: 1 - 2 - 4 - 8
+// Sequence: prev - play/pause - play/pause - next
 // ##################################
 
 // Toggles god mode
@@ -412,16 +413,17 @@ void toggleGodMode() {
 
 // Detects god mode sequence
 bool detectGodMode(char c) {
-    if (p.godModeFlag == 0 && c == '1') {
+    if (p.godModeFlag == 0 && c == COMMAND_PREVIOUS) {
         p.godModeFlag++;
         return false;
-    } else if (p.godModeFlag == 1 && c == '2') {
+    } else if (p.godModeFlag == 1 && c == COMMAND_PLAY_PAUSE) {
         p.godModeFlag++;
         return false;
-    } else if (p.godModeFlag == 2 && c == '4') {
+    } else if (p.godModeFlag == 2 && c == COMMAND_PLAY_PAUSE) {
         p.godModeFlag++;
         return false;
-    } else if (p.godModeFlag == 3 && c == '8') {
+    } else if (p.godModeFlag == 3 && c == COMMAND_NEXT) {
+        p.godModeFlag = 0;
         toggleGodMode();
         return true;
     }
