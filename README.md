@@ -4,26 +4,26 @@ This repository contains the files required to build a
 [Hoerbert](https://en.hoerbert.com) clone. This is intended to be an easy to use
 MP3 player for small children.
 
-Main commponents required to build:
+Main components required to build:
 
 * Arduino Uno
 * Adafruit Music Maker shield
 
 # God mode
 
-The player supptorts 2 differnt modes. Regular mode and god mode.
+The player supports 2 different modes. Regular mode and god mode.
 In regular mode one album is assigned to each button. This is the default mode
 and what the device is mainly intended for.
 To add more functionality, god mode has been added. This mode allows to add an
 alternative set of albums which makes it a handy MP3 player for parents as well.
-In that mode instead of dirictly playing an album for each button press, the
+In that mode instead of directly playing an album for each button press, the
 buttons act as numerical input buttons. 2 buttons have to be pressed to select
 an album. I.e. 4 - 2 to select album 42. Up to 99 albums are supported in
 god mode.
 
 To enter god mode the god mode sequence has to be pressed. The god mode sequence
 is: prev - play_pause - play_ pause - next (regular mode keyboard layout). The
-same sequence can be used to switch back to regular mode. When the seqence has
+same sequence can be used to switch back to regular mode. When the sequence has
 been entered correctly a short beep will sound.
 
 # SD card
@@ -78,6 +78,32 @@ track name already.
 
 To remind the user to turn of the device once the album has finished playing the
 player will sound a short beep every 5 minutes once the last album has played.
+
+# Button PCB schematics
+
+I created a custom PCB for the input buttons. The schematics for that are in the
+cad directory in KiCad format. The Arduino UNO does not have enough GPIO pins
+for the Music Maker shield, the volume pot, and 12 buttons. To reduce the amount
+of GPIO pins required for the buttons I used 2 shift registers. That reduces the
+amount of required pins for the buttons to 3.
+
+I used the following components:
+
+* [2x CD4021BC shift registers](http://www.redrok.com/CMOS_CD4021BC_8-StageStaticShiftRegister_Fairchild.pdf)
+* [OmronB3F Buttons](https://www.amazon.ca/gp/product/B07CW1XJTS)
+* as well as some 0805 1k resistors
+
+ ![PCB CAD](/assets/pcb_cad.jpg)
+![PCB etched](/assets/pcb_etched.jpg)
+![PCB populated](/assets/pcb_populated.jpg)
+
+If you want to etch the PCB yourself you can print this PDF on a transparency.
+Make sure to use US letter sized transparencies if you use the PDF below.
+Alternatively you can just create a new PDF from the KiCad layout.
+
+[PCB transparency](/assets/pcb_cad.pdf)
+
+I followed this [PCB etching proces](https://www.youtube.com/watch?v=tWnfnt2rNO0)
 
 # TODO
 
