@@ -103,7 +103,7 @@ Alternatively you can just create a new PDF from the KiCad layout.
 
 [PCB transparency](/assets/pcb_cad.pdf)
 
-I followed this [PCB etching proces](https://www.youtube.com/watch?v=tWnfnt2rNO0)
+I followed this [PCB etching process](https://www.youtube.com/watch?v=tWnfnt2rNO0)
 
 # TODO
 
