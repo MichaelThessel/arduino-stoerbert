@@ -74,6 +74,11 @@ track name already.
     [7]         [8]             [9]
     [0]         [play_pause]    [next]
 
+# Power saving
+
+To remind the user to turn of the device once the album has finished playing the
+player will sound a short beep every 5 minutes once the last album has played.
+
 # TODO
 
 * [Sleep mode](http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf)
