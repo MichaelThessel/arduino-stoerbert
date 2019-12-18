@@ -99,7 +99,7 @@ i.e.
 
 This only works if the files are named with the first 2 digits indicating their
 track name already. I.e. `01-meshuggah-bleed.mp3`. A great alternative for batch
-renaming the files is (Mp3Tag)[https://www.mp3tag.de/en/].
+renaming the files is [Mp3Tag](https://www.mp3tag.de/en).
 
 # Auto resume
 
