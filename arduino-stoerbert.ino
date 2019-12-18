@@ -16,6 +16,7 @@
 #include "sr.h"
 #include "player.h"
 #include "power.h"
+#include <avr/wdt.h>
 
 extern sr sr1;
 extern sr sr2;
@@ -39,6 +40,8 @@ void setup() {
 // ##################################
 
 void loop() {
+    wdt_reset();
+
     #ifdef DEBUG
     if (Serial.available()) {
         char c = Serial.read();

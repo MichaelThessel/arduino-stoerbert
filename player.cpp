@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <avr/wdt.h>
 
 #include "pins.h"
 #include "debug.h"
@@ -116,6 +117,13 @@ void decreaseVolume() {
         p.volume += VOLUME_STEP;
     }
     setVolume();
+}
+
+// Soft reset
+void reset() {
+    DPRINTLNF("Failure state reached resetting");
+    wdt_enable(WDTO_15MS);
+    while(1);
 }
 
 
@@ -242,6 +250,7 @@ void playFile() {
     if (!SD.exists(path)) {
         DPRINTF("File missing: ");
         DPRINTLN(path);
+        reset();
         resetPlayback();
         return;
     }
@@ -314,6 +323,7 @@ void playAlbum() {
 
     if (p.currentAlbumTrackCount == 0) {
         DPRINTLNF("No tracks found");
+        reset();
         return;
     }
 
