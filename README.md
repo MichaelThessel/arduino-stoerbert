@@ -14,7 +14,7 @@ Main commponents required to build:
 The player supptorts 2 differnt modes. Regular mode and god mode.
 In regular mode one album is assigned to each button. This is the default mode
 and what the device is mainly intended for.
-To add more functionality god mode has been added. This mode allows to add an
+To add more functionality, god mode has been added. This mode allows to add an
 alternative set of albums which makes it a handy MP3 player for parents as well.
 In that mode instead of dirictly playing an album for each button press, the
 buttons act as numerical input buttons. 2 buttons have to be pressed to select
@@ -35,6 +35,7 @@ The SD card needs to be formated with FAT32.
 The root folder structure needs to be:
 
 k01 ... k09 for the regular albums and
+
 g01 ... g99 for the god mode albums
 
 The files in each folder need to be named:
@@ -43,12 +44,12 @@ The files in each folder need to be named:
 
 i.e.
 
-/k06/01.mp3
-/k06/02.mp3
-/k06/03.mp3
-/k06/04.mp3
-/k06/05.mp3
-/k06/06.mp3
+    /k06/01.mp3
+    /k06/02.mp3
+    /k06/03.mp3
+    /k06/04.mp3
+    /k06/05.mp3
+    /k06/06.mp3
 
 ## Convert files to supported file format
 
@@ -75,6 +76,6 @@ track name already.
 
 # TODO
 
-[Sleep mode](http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf)
-[Mono mode](https://github.com/sparkfun/LilyPad_MP3_Player/blob/7c8aa00545772183db7df8860a754d2f9288356a/Arduino/libraries/SFEMP3Shield/SFEMP3Shield.cpp#L989)
+* [Sleep mode](http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf)
+* [Mono mode](https://github.com/sparkfun/LilyPad_MP3_Player/blob/7c8aa00545772183db7df8860a754d2f9288356a/Arduino/libraries/SFEMP3Shield/SFEMP3Shield.cpp#L989)
 
