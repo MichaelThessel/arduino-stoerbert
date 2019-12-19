@@ -110,3 +110,15 @@ powered off before an album finished playing).
 
 To remind the user to turn of the device once the album has finished playing the
 player will sound a short beep every 5 minutes once the last album has played.
+
+# Mono mode
+
+To keep the player compact and reduce power consumption this has been designed
+to work with a single speaker. The Music Maker shield is configured to work in
+mono mode. You can connect your speaker to either of the 2 speaker ports. In
+case you want to build a stereo version you can simply remove these lines from
+player.cpp
+
+    // Enable mono mode
+    vs1053.sciWrite(VS1053_REG_WRAMADDR, 0x1e09);
+    vs1053.sciWrite(VS1053_REG_WRAM, 0x0001);
