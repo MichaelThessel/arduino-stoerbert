@@ -9,10 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <avr/wdt.h>
+#include <avr/pgmspace.h>
 
+#include "plugin.h"
 #include "pins.h"
 #include "debug.h"
 #include "commands.h"
+
+extern const unsigned short PROGMEM plugin[];
 
 player p = {{}, "k01", 0, 0, false, 0, false, 1, 50, false, 0};
 
@@ -22,6 +26,13 @@ Adafruit_VS1053_FilePlayer musicPlayer = Adafruit_VS1053_FilePlayer(
     PIN_VS1053_SHIELD_DCS,
     PIN_VS1053_DREQ,
     PIN_VS1053_CARDCS
+);
+
+Adafruit_VS1053 vs1053 = Adafruit_VS1053(
+    PIN_VS1053_SHIELD_RESET,
+    PIN_VS1053_SHIELD_CS,
+    PIN_VS1053_SHIELD_DCS,
+    PIN_VS1053_DREQ
 );
 
 // ##################################
@@ -394,6 +405,9 @@ void setupPlayer() {
     // Set up volume knob
     pinMode(PIN_VOLUME, INPUT);
     setVolume();
+
+    // Load patches
+    vs1053.applyPatch(plugin, sizeof(plugin)/sizeof(plugin[0]));
 }
 
 // Handle player state
