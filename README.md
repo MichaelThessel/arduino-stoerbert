@@ -110,7 +110,3 @@ powered off before an album finished playing).
 
 To remind the user to turn of the device once the album has finished playing the
 player will sound a short beep every 5 minutes once the last album has played.
-
-# TODO
-
-* [Sleep mode](http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf)
