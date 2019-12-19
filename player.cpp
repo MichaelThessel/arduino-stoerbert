@@ -408,6 +408,11 @@ void setupPlayer() {
 
     // Load patches
     vs1053.applyPatch(plugin, sizeof(plugin)/sizeof(plugin[0]));
+    delay(100);
+
+    // Enable mono mode
+    vs1053.sciWrite(VS1053_REG_WRAMADDR, 0x1e09);
+    vs1053.sciWrite(VS1053_REG_WRAM, 0x0001);
 }
 
 // Handle player state

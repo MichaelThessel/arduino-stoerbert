@@ -114,4 +114,3 @@ player will sound a short beep every 5 minutes once the last album has played.
 # TODO
 
 * [Sleep mode](http://www.vlsi.fi/fileadmin/app_notes/vs1003an_adcpwrdn.pdf)
-* [Mono mode](https://github.com/sparkfun/LilyPad_MP3_Player/blob/7c8aa00545772183db7df8860a754d2f9288356a/Arduino/libraries/SFEMP3Shield/SFEMP3Shield.cpp#L989)
