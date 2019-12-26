@@ -1,13 +1,22 @@
 # Intro
 
-This repository contains the files required to build a
-[Hoerbert](https://en.hoerbert.com) clone. This is intended to be an easy to use
-MP3 player for small children.
+This repository contains the files required to build an easy to use MP3 player for small children.
+This project is heavily inspired by [Hoerbert](https://en.hoerbert.com).
+
+![PCB CAD](/assets/final.jpg)
+![Inside](/assets/inner_front.jpg)
+![Inside](/assets/inner_back.jpg)
 
 Main components required to build:
 
 * Arduino Uno
 * Adafruit Music Maker shield
+* Speaker
+* Button PCB (see below)
+* Volume Pot
+* On/Off switch
+* Battery holders
+* Hookup wire
 
 # Button PCB schematics
 
@@ -23,7 +32,7 @@ I used the following components:
 * [OmronB3F Buttons](https://www.amazon.ca/gp/product/B07CW1XJTS)
 * as well as some 0805 1k resistors
 
- ![PCB CAD](/assets/pcb_cad.jpg)
+![PCB CAD](/assets/pcb_cad.jpg)
 ![PCB etched](/assets/pcb_etched.jpg)
 ![PCB populated](/assets/pcb_populated.jpg)
 
