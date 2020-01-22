@@ -33,6 +33,7 @@ I used the following components:
 * as well as some 0805 1k resistors
 
 ![PCB CAD](/assets/pcb_cad.jpg)
+![PCB Pinout](/assets/pinout.png)
 ![PCB etched](/assets/pcb_etched.jpg)
 ![PCB populated](/assets/pcb_populated.jpg)
 
