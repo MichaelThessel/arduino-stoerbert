@@ -8,7 +8,7 @@
 #define PIN_VS1053_DREQ 3 // VS1053 Data request, ideally an Interrupt pin
 #define PIN_VOLUME A0 // Volume knob pin
 #define PIN_SR_DATA 2 // Shift register data pin
-#define PIN_SR_CLOCK 5 // Shift register data pin
+#define PIN_SR_CLOCK 5 // Shift register clock pin
 #define PIN_SR_LATCH 8 // Shift register latch pin
 
 #endif
