@@ -14,3 +14,12 @@ void setupPower() {
     power_usart0_disable();
     #endif
 }
+
+void reset() {
+    wdt_enable(WDTO_15MS);
+    while(1);
+}
+
+void watchdogReset() {
+    wdt_reset();
+}

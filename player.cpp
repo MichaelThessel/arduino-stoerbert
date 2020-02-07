@@ -8,12 +8,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <avr/wdt.h>
 #include <avr/pgmspace.h>
 
 #include "plugin.h"
 #include "pins.h"
 #include "debug.h"
+#include "power.h"
 #include "commands.h"
 
 extern const unsigned short PROGMEM plugin[];
@@ -131,14 +131,6 @@ void decreaseVolume() {
     setVolume();
 }
 
-// Soft reset
-void reset() {
-    DPRINTLNF("Failure state reached resetting");
-    wdt_enable(WDTO_15MS);
-    while(1);
-}
-
-
 // ##################################
 // EEPROM state saving
 // ##################################
@@ -210,6 +202,17 @@ void clearState() {
 }
 
 // ##################################
+// Reset
+// ##################################
+//
+// Soft reset
+void resetPlayer() {
+    DPRINTLNF("Failure state reached resetting");
+    clearState();
+    reset();
+}
+
+// ##################################
 // Power reminder
 // ##################################
 
@@ -262,7 +265,7 @@ void playFile() {
     if (!SD.exists(path)) {
         DPRINTF("File missing: ");
         DPRINTLN(path);
-        reset();
+        resetPlayer();
         resetPlayback();
         return;
     }
@@ -354,7 +357,7 @@ void playAlbum() {
 
     if (p.currentAlbumTrackCount == 0) {
         DPRINTLNF("No tracks found");
-        reset();
+        resetPlayer();
         return;
     }
 
